@@ -5,6 +5,7 @@ import sys
 
 def parseFile(fileName): 
     
+
     return parse(fileName) 
 
 def createCG(): 
@@ -37,6 +38,10 @@ def main():
                     print(getPort.portname)
                     print("Arg name: ") 
                     print(getPort.argname)
+
+
+
+
     
            
 main()
