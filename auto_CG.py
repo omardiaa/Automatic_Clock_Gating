@@ -28,6 +28,8 @@ def main():
     definition = description.definitions[0]
 
     newrtl =[] 
+
+
   
     for itemDeclaration in definition.items:
         item_type = type(itemDeclaration).__name__
@@ -72,8 +74,10 @@ def main():
                                     print("Module: {} - {} Mux Input: {} Enabler: {} clk: {} input D: {}".format(instance.module, instance.name,muxIn, en, clk, inputD))
 
                                     
-                                    newrtl.append(createCG(clk, en))
-                                    #newrtl.append(vast.InstanceList("sky130_fd_sc_hd__dlclkp", tuple(), tuple([clkgate_cell])))
+                                    #newrtl.append(createCG(str(clk), str(en)))
+                                    #clkgateArgs = [vast.PortArg("GCLK", vast.Identifier("__clockgate_output_gclk_")),vast.PortArg("GATE", vast.Identifier(str(en))),vast.PortArg("CLK", vast.Identifier(str(clk)))]
+                                    #clkgate_cell = vast.Instance("sky130_fd_sc_hd__dlclkp","__clockgate_cell__",tuple(clkgateArgs),tuple())
+                                    newrtl.append(vast.InstanceList("sky130_fd_sc_hd__dlclkp", tuple(), tuple([createCG(str(clk), str(en))])))
                 
 
                 for getPort in instance.portlist:
@@ -108,16 +112,10 @@ def main():
     definition.items = tuple(newrtl)
     codegen = ASTCodeGenerator()
     rslt = codegen.visit(ast)
-    f = open("testUpdated3.v", "w+")
+    f = open("testUpdated4.v", "w+")
     f.write(rslt)
     f.close()                         
           
-
-
-
-
-
-
-    
            
 main()
+
