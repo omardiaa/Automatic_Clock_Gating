@@ -15,7 +15,7 @@ module test2
   sky130_fd_sc_hd__dlclkp
   __clockgate_cell__
   (
-    .GCLK(__clockgate_output_gclk_),
+    .GCLK(_0_),
     .GATE(ld1),
     .CLK(clk)
   );
@@ -24,7 +24,7 @@ module test2
   sky130_fd_sc_hd__dfxtp_1
   _4_
   (
-    .CLK(clk),
+    .CLK(_0_),
     .D(d1),
     .Q(q1)
   );
@@ -33,7 +33,7 @@ module test2
   sky130_fd_sc_hd__dlclkp
   __clockgate_cell__
   (
-    .GCLK(__clockgate_output_gclk_),
+    .GCLK(_1_),
     .GATE(ld2),
     .CLK(clk)
   );
@@ -42,7 +42,7 @@ module test2
   sky130_fd_sc_hd__dfxtp_1
   _5_
   (
-    .CLK(clk),
+    .CLK(_1_),
     .D(d2),
     .Q(q2)
   );

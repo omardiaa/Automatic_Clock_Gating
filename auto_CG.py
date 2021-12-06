@@ -6,9 +6,9 @@ import sys
 def parseFile(fileName): 
     return parse(fileName) 
 
-def createCG(clk, en): 
+def createCG(clk, en, output): 
     clkgateArgs = [
-    vast.PortArg("GCLK", vast.Identifier("__clockgate_output_gclk_")),
+    vast.PortArg("GCLK", vast.Identifier(output)),
     vast.PortArg("GATE", vast.Identifier(en)),
     vast.PortArg("CLK", vast.Identifier(clk))
     ]
@@ -77,12 +77,14 @@ def main():
                                     #newrtl.append(createCG(str(clk), str(en)))
                                     #clkgateArgs = [vast.PortArg("GCLK", vast.Identifier("__clockgate_output_gclk_")),vast.PortArg("GATE", vast.Identifier(str(en))),vast.PortArg("CLK", vast.Identifier(str(clk)))]
                                     #clkgate_cell = vast.Instance("sky130_fd_sc_hd__dlclkp","__clockgate_cell__",tuple(clkgateArgs),tuple())
-                                    newrtl.append(vast.InstanceList("sky130_fd_sc_hd__dlclkp", tuple(), tuple([createCG(str(clk), str(en))])))
+                                    newrtl.append(vast.InstanceList("sky130_fd_sc_hd__dlclkp", tuple(), tuple([createCG(str(clk), str(en), str(inputD))])))
                 
 
                 for getPort in instance.portlist:
                     if(getPort.portname == "D"):
                         getPort.argname = muxIn
+                    elif(getPort.portname == "CLK"):
+                        getPort.argname = inputD
                        #update flipflop input to the old input of the mux [the input which was not connected to the output]
                 
                 if append:
@@ -103,12 +105,6 @@ def main():
                 print(getPort.argname)
 
 
-
-
-
-
-     
-    
     definition.items = tuple(newrtl)
     codegen = ASTCodeGenerator()
     rslt = codegen.visit(ast)
