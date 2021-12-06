@@ -6,11 +6,11 @@ import sys
 def parseFile(fileName): 
     return parse(fileName) 
 
-def createCG(): 
+def createCG(clk, en): 
     clkgateArgs = [
     vast.PortArg("GCLK", vast.Identifier("__clockgate_output_gclk_")),
-    vast.PortArg("GATE", vast.Identifier("EN")),
-    vast.PortArg("CLK", vast.Identifier("CLK"))
+    vast.PortArg("GATE", vast.Identifier(en)),
+    vast.PortArg("CLK", vast.Identifier(clk))
     ]
 
     cG = vast.Instance("sky130_fd_sc_hd__dlclkp","__clockgate_cell__", tuple(clkgateArgs), tuple())
@@ -22,32 +22,27 @@ def createCG():
 
 def main(): 
 
-    cG = createCG() 
-    print(cG.name); 
-    print(cG.module);
-    cGOutput = vast.Wire('__clockgate_output_gclk_')
-    ast,_= parseFile([sys.argv[1]]) #root node of the abstract syntax tree  
+    f = "test2.gl.v"
+    ast,_= parse([f]) #root node of the abstract syntax tree  
     description = ast.description  #moduleDef node 
     definition = description.definitions[0]
 
     newrtl =[] 
-    newrtl.append(cG)
-
-    # definition.items = tuple(newrtl)
-    # codegen = ASTCodeGenerator()
-    # rslt = codegen.visit(ast)
-    # f = open("testUpdated.v", "w+")
-    # f.write(rslt)
-    # f.close()
-
-    
+  
     for itemDeclaration in definition.items:
         item_type = type(itemDeclaration).__name__
+        append = True
         if item_type == "InstanceList":
             instance = itemDeclaration.instances[0]
             inputD = ""
             outputQ = ""
             clk = ""
+            if(instance.module == "sky130_fd_sc_hd__mux2_1" or instance.module ==  "sky130_fd_sc_hd__a21oi_1" or instance.module == "sky130_fd_sc_hd__a21oi_2"):
+                append = False
+                #don't append mux
+            else:
+                append = True
+
             if(instance.module == "sky130_fd_sc_hd__dfxtp_1"):
                 
                 for getPort in instance.portlist:
@@ -75,13 +70,48 @@ def main():
                                         elif(getPort.portname =="A1" and getPort.argname != outputQ):
                                             muxIn = getPort.argname
                                     print("Module: {} - {} Mux Input: {} Enabler: {} clk: {} input D: {}".format(instance.module, instance.name,muxIn, en, clk, inputD))
-            # if(instance.module == "sky130_fd_sc_hd__mux2_1" or instance.module ==  "sky130_fd_sc_hd__a21oi_1" or instance.module == "sky130_fd_sc_hd__a21oi_2"):
-            #     print(instance.module)
-            #     for getPort in instance.portlist: 
-            #         print("Port name: ") 
-            #         print(getPort.portname)
-            #         print("Arg name: ") 
-            #         print(getPort.argname)
+
+                                    
+                                    newrtl.append(createCG(clk, en))
+                                    #newrtl.append(vast.InstanceList("sky130_fd_sc_hd__dlclkp", tuple(), tuple([clkgate_cell])))
+                
+
+                for getPort in instance.portlist:
+                    if(getPort.portname == "D"):
+                        getPort.argname = muxIn
+                       #update flipflop input to the old input of the mux [the input which was not connected to the output]
+                
+                if append:
+                    newrtl.append(itemDeclaration)
+
+
+
+    for itemDeclaration in newrtl:
+        item_type = type(itemDeclaration).__name__
+        if item_type == "InstanceList":
+            instance = itemDeclaration.instances[0]
+            
+            print(instance.module)
+            for getPort in instance.portlist: 
+                print("Port name: ") 
+                print(getPort.portname)
+                print("Arg name: ") 
+                print(getPort.argname)
+
+
+
+
+
+
+     
+    
+    definition.items = tuple(newrtl)
+    codegen = ASTCodeGenerator()
+    rslt = codegen.visit(ast)
+    f = open("testUpdated3.v", "w+")
+    f.write(rslt)
+    f.close()                         
+          
 
 
 
