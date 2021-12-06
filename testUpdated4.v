@@ -11,6 +11,15 @@ module test2
   q2
 );
 
+  wire _0_;
+  wire _1_;
+  input clk;
+  input d1;
+  input d2;
+  input ld1;
+  input ld2;
+  output q1;
+  output q2;
 
   sky130_fd_sc_hd__dlclkp
   __clockgate_cell__

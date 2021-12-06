@@ -29,6 +29,15 @@ def main():
 
     newrtl =[] 
 
+    for itemDeclaration in definition.items:
+        item_type = type(itemDeclaration).__name__
+        append = True
+        print(item_type)
+        if item_type == "Decl":
+            newrtl.append(itemDeclaration)
+           
+
+
 
   
     for itemDeclaration in definition.items:
