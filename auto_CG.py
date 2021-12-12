@@ -45,7 +45,7 @@ def reachEnd(ter, definition, outputPort, selectionLine, inputPort, inputComp):
                                 reachEnd(ter, definition, outputPort, selectionLine, str(port2.argname), str(instance.name))
 
 
-def reachEnd2(definition, inputPort, selectionLine, outputPort, inputComp):
+def reachEnd2(definition,dff, inputPort, selectionLines, outputPort, inputComp):
     
     for itemDeclaration in definition.items:
         if type(itemDeclaration).__name__ == "InstanceList":
@@ -57,9 +57,28 @@ def reachEnd2(definition, inputPort, selectionLine, outputPort, inputComp):
                     arg=str(port.argname.var)+str(port.argname.ptr)
 
                 # print(str(port.argname)==outputPort )
+                # for curSel in selectionLines:
+                #     if arg == curSel:
+                #         print("Selection {} ".format(port.argname))
+
                 if(str(instance.name)!=inputComp and arg==outputPort ):
+
                     print("0. Name {} Module {} port {} arg {}".format(instance.name, instance.module,port.portname,arg))
-       
+
+                    for port2 in instance.portlist:
+                        arg2 = str(port2.argname)
+                        if(hasattr(port2.argname,"ptr")):
+                            arg2=str(port2.argname.var)+str(port2.argname.ptr)
+                        if(str(port2.portname)!="X" and str(port2.portname)!="Y" and arg2!=outputPort and arg2!="clk" and instance.name!=dff):            
+                            b=True                            
+                            for curSel in selectionLines:
+                                if arg2 == curSel:
+                                    print("Selection: {}".format(arg2))
+                                    b=False
+                            if b:
+                                print("Input: {}".format(arg2))
+
+
                     for port2 in instance.portlist:
                         arg2 = str(port2.argname)
                         if(hasattr(port2.argname,"ptr")):
@@ -67,14 +86,14 @@ def reachEnd2(definition, inputPort, selectionLine, outputPort, inputComp):
 
                         if(str(port2.portname)=="X" or str(port2.portname)=="Y"):
                             if(arg2==outputPort):
-                                print("1. Name {} Module {} port {} arg {}".format(instance.name, instance.module,port2.portname,arg2))
+                                # print("1. Name {} Module {} port {} arg {}".format(instance.name, instance.module,port2.portname,arg2))
        
                                 print("base case reached!")
                                 break
                             else:
-                                print("2. Name {} Module {} port {} arg {}".format(instance.name, instance.module,port2.portname,arg2))
+                                # print("2. Name {} Module {} port {} arg {}".format(instance.name, instance.module,port2.portname,arg2))
        
-                                reachEnd2(definition, inputPort, selectionLine, arg2, str(instance.name))
+                                reachEnd2(definition,dff, inputPort, selectionLines, arg2, str(instance.name))
 
 def main(): 
 
@@ -98,6 +117,7 @@ def main():
            
 
     # reachEnd(5, definition,"r[3]","s","_03_","_41_")
+    selectionLines = ["s","ld1","ld2"]
     for itemDeclaration in definition.items:
         if type(itemDeclaration).__name__ == "InstanceList":
             instance = itemDeclaration.instances[0]
@@ -109,9 +129,9 @@ def main():
                 if str(instance.module) == "sky130_fd_sc_hd__dfxtp_1" and port.portname=="Q":
                     print(port.argname)
                     if(hasattr(port.argname,"ptr")):
-                        reachEnd2(definition,dIn,"s",str(port.argname.var)+str(port.argname.ptr),instance.name)
+                        reachEnd2(definition,instance.name,dIn,selectionLines,str(port.argname.var)+str(port.argname.ptr),instance.name)
                     else:
-                        reachEnd2(definition,dIn,"s",str(port.argname),instance.name)
+                        reachEnd2(definition,instance.name,dIn,selectionLines,str(port.argname),instance.name)
 
 #   str(port.argname.var)+str(port.argname.ptr)
 
